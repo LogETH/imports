@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import {IERC20} from "https://github.com/LogETH/imports/blob/main/IERC20.sol";
 import {SafeERC20} from "https://github.com/LogETH/imports/blob/main/SafeERC20.sol";
 import {SafeMath} from "https://github.com/LogETH/imports/blob/main/SafeMath.sol";
-import {StrategyLib} from "./StrategyLib.sol";
+import {StrategyLib} from "https://github.com/LogETH/imports/blob/main/StrategyLib.sol";
 
 struct StrategyParams {
     uint256 performanceFee;
