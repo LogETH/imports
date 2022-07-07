@@ -1,5 +1,8 @@
 pragma solidity >=0.6.0 <0.7.0;
 
+import {SafeMath} from "https://github.com/LogETH/imports/blob/main/SafeMath.sol";
+import {Address} from "https://github.com/LogETH/imports/blob/main/address.sol";
+
 library SafeERC20 {
     using SafeMath for uint256;
     using Address for address;
