@@ -9,16 +9,16 @@ pragma solidity 0.6.12;
 import {
     BaseStrategy,
     StrategyParams
-} from "@yearn/yearn-vaults/blob/main/contracts/BaseStrategy.sol";
+} from "https://github.com/LogETH/imports/blob/main/BaseStratagy.sol";
 import {
     SafeERC20,
     SafeMath,
     IERC20,
     Address
-} from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+} from "https://github.com/LogETH/imports/blob/main/SafeMath.sol";
 
 // Import interfaces for many popular DeFi projects, or add your own!
-//import "../interfaces/<protocol>/<Interface>.sol";
+//import "../interfaces/protocol/<Interface>.sol";
 
 contract Strategy is BaseStrategy {
     using SafeERC20 for IERC20;
