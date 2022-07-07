@@ -1,3 +1,5 @@
+pragma solidity >=0.6.0 <0.7.0;
+
 library SafeMath {
   function mul(uint a, uint b) internal returns (uint) {
     uint c = a * b;
