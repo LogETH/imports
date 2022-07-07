@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
+import {SafeMath} from "https://github.com/LogETH/imports/blob/main/SafeMath.sol";
 import {StrategyLib} from "./StrategyLib.sol";
 
 struct StrategyParams {
