@@ -2,7 +2,7 @@
 pragma solidity >=0.6.0 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20} from "https://github.com/LogETH/imports/blob/main/IERC20.sol";
 import {SafeERC20} from "https://github.com/LogETH/imports/blob/main/SafeERC20.sol";
 import {SafeMath} from "https://github.com/LogETH/imports/blob/main/SafeMath.sol";
 import {StrategyLib} from "./StrategyLib.sol";
