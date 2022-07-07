@@ -1,3 +1,182 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.6.0 <0.7.0;
+pragma experimental ABIEncoderV2;
+
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
+import {StrategyLib} from "./StrategyLib.sol";
+
+struct StrategyParams {
+    uint256 performanceFee;
+    uint256 activation;
+    uint256 debtRatio;
+    uint256 minDebtPerHarvest;
+    uint256 maxDebtPerHarvest;
+    uint256 lastReport;
+    uint256 totalDebt;
+    uint256 totalGain;
+    uint256 totalLoss;
+}
+
+interface VaultAPI is IERC20 {
+    function name() external view returns (string calldata);
+
+    function symbol() external view returns (string calldata);
+
+    function decimals() external view returns (uint256);
+
+    function apiVersion() external pure returns (string memory);
+
+    function permit(
+        address owner,
+        address spender,
+        uint256 amount,
+        uint256 expiry,
+        bytes calldata signature
+    ) external returns (bool);
+
+    // NOTE: Vyper produces multiple signatures for a given function with "default" args
+    function deposit() external returns (uint256);
+
+    function deposit(uint256 amount) external returns (uint256);
+
+    function deposit(uint256 amount, address recipient) external returns (uint256);
+
+    // NOTE: Vyper produces multiple signatures for a given function with "default" args
+    function withdraw() external returns (uint256);
+
+    function withdraw(uint256 maxShares) external returns (uint256);
+
+    function withdraw(uint256 maxShares, address recipient) external returns (uint256);
+
+    function token() external view returns (address);
+
+    function strategies(address _strategy) external view returns (StrategyParams memory);
+
+    function pricePerShare() external view returns (uint256);
+
+    function totalAssets() external view returns (uint256);
+
+    function depositLimit() external view returns (uint256);
+
+    function maxAvailableShares() external view returns (uint256);
+
+    /**
+     * View how much the Vault would increase this Strategy's borrow limit,
+     * based on its present performance (since its last report). Can be used to
+     * determine expectedReturn in your Strategy.
+     */
+    function creditAvailable() external view returns (uint256);
+
+    /**
+     * View how much the Vault would like to pull back from the Strategy,
+     * based on its present performance (since its last report). Can be used to
+     * determine expectedReturn in your Strategy.
+     */
+    function debtOutstanding() external view returns (uint256);
+
+    /**
+     * View how much the Vault expect this Strategy to return at the current
+     * block, based on its present performance (since its last report). Can be
+     * used to determine expectedReturn in your Strategy.
+     */
+    function expectedReturn() external view returns (uint256);
+
+    /**
+     * This is the main contact point where the Strategy interacts with the
+     * Vault. It is critical that this call is handled as intended by the
+     * Strategy. Therefore, this function will be called by BaseStrategy to
+     * make sure the integration is correct.
+     */
+    function report(
+        uint256 _gain,
+        uint256 _loss,
+        uint256 _debtPayment
+    ) external returns (uint256);
+
+    /**
+     * This function should only be used in the scenario where the Strategy is
+     * being retired but no migration of the positions are possible, or in the
+     * extreme scenario that the Strategy needs to be put into "Emergency Exit"
+     * mode in order for it to exit as quickly as possible. The latter scenario
+     * could be for any reason that is considered "critical" that the Strategy
+     * exits its position as fast as possible, such as a sudden change in
+     * market conditions leading to losses, or an imminent failure in an
+     * external dependency.
+     */
+    function revokeStrategy() external;
+
+    /**
+     * View the governance address of the Vault to assert privileged functions
+     * can only be called by governance. The Strategy serves the Vault, so it
+     * is subject to governance defined by the Vault.
+     */
+    function governance() external view returns (address);
+
+    /**
+     * View the management address of the Vault to assert privileged functions
+     * can only be called by management. The Strategy serves the Vault, so it
+     * is subject to management defined by the Vault.
+     */
+    function management() external view returns (address);
+
+    /**
+     * View the guardian address of the Vault to assert privileged functions
+     * can only be called by guardian. The Strategy serves the Vault, so it
+     * is subject to guardian defined by the Vault.
+     */
+    function guardian() external view returns (address);
+}
+
+/**
+ * This interface is here for the keeper bot to use.
+ */
+interface StrategyAPI {
+    function name() external view returns (string memory);
+
+    function vault() external view returns (address);
+
+    function want() external view returns (address);
+
+    function apiVersion() external pure returns (string memory);
+
+    function keeper() external view returns (address);
+
+    function isActive() external view returns (bool);
+
+    function delegatedAssets() external view returns (uint256);
+
+    function estimatedTotalAssets() external view returns (uint256);
+
+    function tendTrigger(uint256 callCost) external view returns (bool);
+
+    function tend() external;
+
+    function harvestTrigger(uint256 callCost) external view returns (bool);
+
+    function harvest() external;
+
+    event Harvested(uint256 profit, uint256 loss, uint256 debtPayment, uint256 debtOutstanding);
+}
+
+/**
+ * @title Yearn Base Strategy
+ * @author yearn.finance
+ * @notice
+ *  BaseStrategy implements all of the required functionality to interoperate
+ *  closely with the Vault contract. This contract should be inherited and the
+ *  abstract methods implemented to adapt the Strategy to the particular needs
+ *  it has to create a return.
+ *
+ *  Of special interest is the relationship between `harvest()` and
+ *  `vault.report()'. `harvest()` may be called simply because enough time has
+ *  elapsed since the last report, and not because any funds need to be moved
+ *  or positions adjusted. This is critical so that the Vault may maintain an
+ *  accurate picture of the Strategy's performance. See  `vault.report()`,
+ *  `harvest()`, and `harvestTrigger()` for further details.
+ */
+
 abstract contract BaseStrategy {
     using SafeMath for uint256;
     string public metadataURI;
@@ -681,5 +860,49 @@ abstract contract BaseStrategy {
         for (uint256 i; i < _protectedTokens.length; i++) require(_token != _protectedTokens[i], "!protected");
 
         SafeERC20.safeTransfer(IERC20(_token), governance(), IERC20(_token).balanceOf(address(this)));
+    }
+}
+
+abstract contract BaseStrategyInitializable is BaseStrategy {
+    bool public isOriginal = true;
+    event Cloned(address indexed clone);
+
+    constructor(address _vault) public BaseStrategy(_vault) {}
+
+    function initialize(
+        address _vault,
+        address _strategist,
+        address _rewards,
+        address _keeper
+    ) external virtual {
+        _initialize(_vault, _strategist, _rewards, _keeper);
+    }
+
+    function clone(address _vault) external returns (address) {
+        return this.clone(_vault, msg.sender, msg.sender, msg.sender);
+    }
+
+    function clone(
+        address _vault,
+        address _strategist,
+        address _rewards,
+        address _keeper
+    ) external returns (address newStrategy) {
+        require(isOriginal, "!clone");
+        // Copied from https://github.com/optionality/clone-factory/blob/master/contracts/CloneFactory.sol
+        bytes20 addressBytes = bytes20(address(this));
+
+        assembly {
+            // EIP-1167 bytecode
+            let clone_code := mload(0x40)
+            mstore(clone_code, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
+            mstore(add(clone_code, 0x14), addressBytes)
+            mstore(add(clone_code, 0x28), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
+            newStrategy := create(0, clone_code, 0x37)
+        }
+
+        BaseStrategyInitializable(newStrategy).initialize(_vault, _strategist, _rewards, _keeper);
+
+        emit Cloned(newStrategy);
     }
 }
