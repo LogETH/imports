@@ -9,13 +9,12 @@ pragma solidity 0.6.12;
 import {
     BaseStrategy,
     StrategyParams
-} from "https://github.com/LogETH/imports/blob/main/BaseStratagy.sol";
-import {
-    SafeERC20,
-    SafeMath,
-    IERC20,
-    Address
-} from "https://github.com/LogETH/imports/blob/main/SafeMath.sol";
+} from "https://github.com/LogETH/imports/blob/main/BaseStrategy.sol";
+
+import {SafeMath} from "https://github.com/LogETH/imports/blob/main/SafeMath.sol";
+import {SafeERC20} from "https://github.com/LogETH/imports/blob/main/SafeERC20.sol";
+import {Address} from "https://github.com/LogETH/imports/blob/main/address.sol";
+import {IERC20} from "https://github.com/LogETH/imports/blob/main/IERC20.sol";
 
 // Import interfaces for many popular DeFi projects, or add your own!
 //import "../interfaces/protocol/<Interface>.sol";
