@@ -3,7 +3,7 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 import {SafeMath} from "https://github.com/LogETH/imports/blob/main/SafeMath.sol";
-import {StrategyParams, VaultAPI, StrategyAPI} from "https://github.com/LogETH/imports/blob/main/BaseStratagy.sol";
+import {StrategyParams, VaultAPI, StrategyAPI} from "https://github.com/LogETH/imports/blob/main/BaseStrategy.sol";
 
 library StrategyLib {
     using SafeMath for uint256;
