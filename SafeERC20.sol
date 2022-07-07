@@ -1,3 +1,5 @@
+pragma solidity >=0.6.0 <0.7.0;
+
 library SafeERC20 {
     using SafeMath for uint256;
     using Address for address;
