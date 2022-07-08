@@ -29,7 +29,7 @@ contract Strategy is BaseStrategy {
         // maxReportDelay = 6300;
         // profitFactor = 100;
         // debtThreshold = 0;
-        ETHwant = Oracle(0x773616e4d11a78f511299002da57a0a94577f1f4);
+        ETHwant = Oracle(0x773616E4d11A78F511299002da57A0a94577F1f4);
 
         want = IERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F); //This is want
         fcToken = Rari(0x0000000000000000000000000000000000000000); // Replace with the actual fcToken address please.
@@ -91,7 +91,7 @@ contract Strategy is BaseStrategy {
 
     function adjustPosition(uint256 _debtOutstanding) internal override {
 
-        want.transferFrom(vault, address(this), _debtOutstanding);       // Get want from vault
+        want.transferFrom(address(vault), address(this), _debtOutstanding);       // Get want from vault
         want.approve(address(cToken), _debtOutstanding);
         cToken.mint(want.balanceOf(address(this)));                        // Deposit into compound
         cToken.approve(address(fcToken), cToken.balanceOf(address(this)));
@@ -192,7 +192,7 @@ contract Strategy is BaseStrategy {
 interface Oracle{
 
     // Chainlink Dev Docs https://docs.chain.link/docs/
-    function latestRoundData() external returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
+    function latestRoundData() external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
 }
 
 // Yes, I know Rari and Comp are the same, but naming them differently made things easier
@@ -207,7 +207,7 @@ interface Rari{
     function transfer(address, uint256) external;
     function borrow(uint borrowAmount) external returns (uint);
     function repayBorrow(uint repayAmount) external returns (uint);
-    function exchangeRateCurrent() external returns (uint);
+    function exchangeRateCurrent() external view returns (uint);
     function balanceOf(address) external view returns(uint);
     function getAccountLiquidity(address account) external returns (uint, uint, uint);
     function borrowBalanceCurrent(address account) external returns (uint);
@@ -217,7 +217,7 @@ interface Comp {
 
     // Comp dev docs https://medium.com/compound-finance/supplying-assets-to-the-compound-protocol-ec2cf5df5aa#afff
     function mint(uint256) external returns (uint256);
-    function exchangeRateCurrent() external returns (uint256);
+    function exchangeRateCurrent() external view returns (uint256);
     function supplyRatePerBlock() external returns (uint256);
     function redeem(uint) external returns (uint);
     function redeemUnderlying(uint) external returns (uint);
