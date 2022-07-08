@@ -906,3 +906,4 @@ abstract contract BaseStrategyInitializable is BaseStrategy {
         emit Cloned(newStrategy);
     }
 }
+
