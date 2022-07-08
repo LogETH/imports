@@ -1,4 +1,5 @@
 pragma solidity >=0.6.0 <0.7.0;
+//"SPDX-License-Identifier: MIT
 
 import {SafeMath} from "https://github.com/LogETH/imports/blob/main/SafeMath.sol";
 import {Address} from "https://github.com/LogETH/imports/blob/main/address.sol";
@@ -34,4 +35,12 @@ library SafeERC20 {
             require(abi.decode(returndata, (bool)), "SafeERC20: ERC20 operation did not succeed");
         }
     }
+}
+
+interface IERC20{
+    function transferFrom(address, address, uint256) external;
+    function transfer(address, uint256) external;
+    function balanceOf(address) external view returns(uint);
+    function allowance(address, address) external view returns(uint);
+    function approve(address, uint) external returns(bool);
 }
