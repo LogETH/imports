@@ -217,7 +217,7 @@ abstract contract BaseStrategy {
      *  The amount of assets this strategy manages that should not be included in Yearn's Total Value
      *  Locked (TVL) calculation across it's ecosystem.
      */
-    function delegatedAssets() external view virtual returns (uint256) {
+    function delegatedAssets() external pure virtual returns (uint256) {
         return 0;
     }
 
@@ -299,27 +299,27 @@ abstract contract BaseStrategy {
         _;
     }
 
-    function _onlyAuthorized() internal {
+    function _onlyAuthorized() internal view {
         require(msg.sender == strategist || msg.sender == governance());
     }
 
-    function _onlyEmergencyAuthorized() internal {
+    function _onlyEmergencyAuthorized() internal view {
         require(msg.sender == strategist || msg.sender == governance() || msg.sender == vault.guardian() || msg.sender == vault.management());
     }
 
-    function _onlyStrategist() internal {
+    function _onlyStrategist() internal view {
         require(msg.sender == strategist);
     }
 
-    function _onlyGovernance() internal {
+    function _onlyGovernance() internal view {
         require(msg.sender == governance());
     }
 
-    function _onlyRewarder() internal {
+    function _onlyRewarder() internal view {
         require(msg.sender == governance() || msg.sender == strategist);
     }
 
-    function _onlyKeepers() internal {
+    function _onlyKeepers() internal view {
         require(
             msg.sender == keeper ||
                 msg.sender == strategist ||
@@ -640,15 +640,15 @@ abstract contract BaseStrategy {
      * @param callCostInWei The keeper's estimated gas cost to call `tend()` (in wei).
      * @return `true` if `tend()` should be called, `false` otherwise.
      */
-    function tendTrigger(uint256 callCostInWei) public view virtual returns (bool) {
+//    function tendTrigger(uint256 callCostInWei) public pure virtual returns (bool) {
         // We usually don't need tend, but if there are positions that need
         // active maintainence, overriding this function is how you would
         // signal for that.
         // If your implementation uses the cost of the call in want, you can
         // use uint256 callCost = ethToWant(callCostInWei);
 
-        return false;
-    }
+//        return false;
+//   }
 
     /**
      * @notice
@@ -906,4 +906,3 @@ abstract contract BaseStrategyInitializable is BaseStrategy {
         emit Cloned(newStrategy);
     }
 }
-
