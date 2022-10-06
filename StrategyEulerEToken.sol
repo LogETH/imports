@@ -29,9 +29,9 @@ contract Strategy is BaseStrategy {
         // maxReportDelay = 6300;
         // profitFactor = 100;
         // debtThreshold = 0;
-        ETHwant = Oracle(0x773616E4d11A78F511299002da57A0a94577F1f4); // This is the ETHWANT oracle
-        euler;
-        want = IERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F); // This is want
+        ETHwant = Oracle(0x0000000000000000000000000000000000000000); // This is the ETHWANT oracle
+        euler = IEuler(0x0000000000000000000000000000000000000000); // This is the main euler contract
+        want = IERC20(0x0000000000000000000000000000000000000000); // This is want
 
         eToken = IeToken(euler.underlyingToEToken(address(want)));
 
@@ -135,7 +135,7 @@ contract Strategy is BaseStrategy {
 
         address[] memory protected = new address[](2);
 
-        protected[0] = address(eToken); // Replace with the actual fcToken address please.
+        protected[0] = address(eToken);
         
         return protected;
     }
