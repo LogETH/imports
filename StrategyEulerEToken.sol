@@ -65,13 +65,14 @@ contract Strategy is BaseStrategy {
 
         _profit = eToken.balanceOfUnderlying(address(this)).sub(vault.debtOutstanding());
 
-        eToken.withdraw(0, _profit);
-
+        eToken.withdraw(0, _profit); // withdraw _profit from euler
 
         _loss = 0; // It is impossible to lose money from this stratagy, so loss is always zero.
         // (Unless euler gets hacked.. but then this vault will probably be the least of your concerns.)
 
         _debtPayment = _debtOutstanding; // _debtOutstanding 'want' is freed up from the underlying position 
+
+        // Do I repay the vault in this function? it says to just free it up, but I'm not really sure
 
         return (_profit, _loss, _debtPayment);
     }
@@ -79,7 +80,7 @@ contract Strategy is BaseStrategy {
     function adjustPosition(uint256 _debtOutstanding) internal override {
 
         want.transferFrom(address(vault), address(this), _debtOutstanding);       // Get want from vault
-        eToken.deposit(0, _debtOutstanding);
+        eToken.deposit(0, _debtOutstanding); // deposit want into euler
     }
 
     function liquidatePosition(uint256 _amountNeeded)
@@ -169,8 +170,6 @@ interface Oracle{
     // Chainlink Dev Docs https://docs.chain.link/docs/
     function latestRoundData() external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
 }
-
-// Yes, I know Rari and Comp are the same, but naming them differently made things easier
 
 interface IEuler{
 
