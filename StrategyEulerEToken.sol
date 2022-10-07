@@ -29,6 +29,9 @@ contract Strategy is BaseStrategy {
         // maxReportDelay = 6300;
         // profitFactor = 100;
         // debtThreshold = 0;
+
+        // If oracle is wETH/ETH, leave it as address(0).
+
         ETHwant = Oracle(0x0000000000000000000000000000000000000000); // This is the ETHWANT oracle
         euler = IEuler(0x0000000000000000000000000000000000000000); // This is the main euler contract
         want = IERC20(0x0000000000000000000000000000000000000000); // This is want
@@ -157,6 +160,8 @@ contract Strategy is BaseStrategy {
      **/
     function ethToWant(uint256 _amtInWei) public view virtual override returns (uint256){
         // TODO create an accurate price oracle
+        if(ETHwant == Oracle(address(0))){return 1;}
+
         (,int price,,,) = ETHwant.latestRoundData();
 
         _amtInWei = _amtInWei.mul(uint(price)).div(10**8);
